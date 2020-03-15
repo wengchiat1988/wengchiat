@@ -1,0 +1,54 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {
+        'packages':['geochart'],
+        // Note: you will need to get a mapsApiKey for your project.
+        // See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings
+        'mapsApiKey': 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'
+      });
+      google.charts.setOnLoadCallback(drawRegionsMap);
+
+      function drawRegionsMap() {
+        var opts = {sendMethod: 'auto'};
+		  // Replace the data source URL on next line with your data source URL.
+		  var query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1ROh9TBJmFCXhBzc5pMniFqYKNIIDHWVfIHvYgUVOy90/edit?usp=sharing', opts);
+
+		  // Optional request to return only column C and the sum of column B, grouped by C members.
+		  query.setQuery('select E, F');
+
+		  // Send the query with a callback function.
+		query.send(handleQueryResponse);
+      }
+	  
+	  function handleQueryResponse(response) {
+	  // Called when the query response is returned.
+	  if (response.isError()) {
+		alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
+		return;
+	  }
+	  
+	  var options = {
+		  width:900,
+		  height:500,
+		  colorAxis: {colors: ['yellow','FFE033','FF7A33', 'red','maroon']},
+          backgroundColor: '#81d4fa',
+          datalessRegionColor: 'white',
+          defaultColor: '#f5f5f5',
+		  resolution: 'provinces',
+		  region: 'IT',
+		}
+	  
+	  var data = response.getDataTable();
+		var chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
+		   
+		chart.draw(data, options);
+
+	}
+    </script>
+  </head>
+  <body>
+    <div id="regions_div" style="width: 900px; height: 500px;"></div>
+  </body>
+</html>
