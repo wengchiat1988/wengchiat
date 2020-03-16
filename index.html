@@ -6,6 +6,12 @@
 	<option value="150">Europe</option>
 	<option value="142">Asia</option>
 	</select>
+	<select style="height:30px" onchange="drawRegionsMap()" id='select2'>
+	<option value="1">Active</option>
+	<option value="2">Confirmed</option>
+	<option value="3">Recovered</option>
+	<option value="4">Deaths</option>
+	</select>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
       google.charts.load('current', {
@@ -20,7 +26,12 @@
       function drawRegionsMap() {
         var opts = {sendMethod: 'auto'};
 		var query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1gDE-QQETeyQ_gBsbb9CXueuryhYUjK8CbbwSBLnmggY/edit?usp=sharing', opts);
-		query.setQuery('select B, sum(I) group by B');
+		var sel = document.getElementById("select2");
+		var x = sel.value;
+		if(x==1) query.setQuery('select B, sum(I) group by B');
+		if(x==2) query.setQuery('select B, sum(D) group by B');
+		if(x==3) query.setQuery('select B, sum(F) group by B');
+		if(x==4) query.setQuery('select B, sum(E) group by B');
 		query.send(handleQueryResponse);
       }
 	  
@@ -28,8 +39,10 @@
         var opts = {sendMethod: 'auto'};
 		var query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1ROh9TBJmFCXhBzc5pMniFqYKNIIDHWVfIHvYgUVOy90/edit?usp=sharing', opts);
 		if(region=='US')query.setQuery('select E, F');
-		if(region=='China')query.setQuery('select K, L');
+		if(region=='China')query.setQuery('select M, L');
 		if(region=='Italy')query.setQuery('select H, I');
+		if(region=='United Kingdom')query.setQuery('select O, P');
+		if(region=='Spain')query.setQuery('select T, S');
 		query.send(handleQueryResponse2);
       }
 	  
@@ -56,7 +69,8 @@
 		var selectedItem = chart.getSelection()[0];
 	    if (selectedItem) {
 		  var country = data.getValue(selectedItem.row, 0);
-		  if(country == 'US' || country == 'China' || country == 'Italy') {
+		  if(country == 'US' || country == 'China' || country == 'Italy' || country == 'United Kingdom'
+		  || country == 'Germany' || country == 'Spain' || country == 'France') {
 			region = country;
 			drawCountryMap();
 		  }
@@ -75,6 +89,10 @@
 	  var x = 'US';
 	  if(region == 'China') x = 'CN';
 	  if(region == 'Italy') x = 'IT';
+	  if(region == 'United Kingdom') x = 'GB';
+	  if(region == 'Spain') x = 'ES';
+	  if(region == 'Germany') x = 'DE';
+	  if(region == 'France') x = 'FR';
 	  var options = {
 		  'width':900,
 		  'height':500,
