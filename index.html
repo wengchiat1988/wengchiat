@@ -1,7 +1,7 @@
 <html>
 	
 	<head>
-	<select style="height:30px" onchange="drawRegionsMap()" id='select1'>
+	<select style="height:30px" onchange="drawRegionsMap();drawOverlay()" id='select1'>
 	<option value="world">Worldwide</option>
 	<option value="150">Europe</option>
 	<option value="142">Asia</option>
@@ -129,6 +129,8 @@
 		alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
 		return;
 	  } 
+	  var sel = document.getElementById("select1");
+	  var y = sel.value;
 	  var options = {
 		  'width':900,
 		  'height':500,
@@ -137,7 +139,8 @@
           datalessRegionColor: 'transparent',
           defaultColor: 'transparent',
 		  displayMode: 'markers',
-		  legend: 'none'
+		  legend: 'none',
+		  region: y
 		}
 	  var sel = document.getElementById("select3");
 	  var x = sel.value;
