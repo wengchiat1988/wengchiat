@@ -1,7 +1,7 @@
 <html>
 	
 	<head>
-	<select style="height:30px" onchange="drawRegionsMap();drawOverlay()" id='select1'>
+	<select style="height:30px" onchange="drawRegionsMap();drawOverlay();" id='select1'>
 	<option value="world">Worldwide</option>
 	<option value="150">Europe</option>
 	<option value="142">Asia</option>
@@ -13,7 +13,7 @@
 	<option value="4">Deaths</option>
 	</select>
 	</select>
-	<select style="height:30px" onchange="drawOverlay()" id='select3'>
+	<select style="height:30px" onchange="drawOverlay();drawOverlay2()" id='select3'>
 	<option value="1">Overlay Off</option>
 	<option value="2">Overlay On</option>
 	</select>
@@ -27,6 +27,7 @@
         'mapsApiKey': 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'
       });
       google.charts.setOnLoadCallback(drawRegionsMap);
+	  google.charts.setOnLoadCallback(drawCountryMap);
 	  var region = 'US';
 	  
       function drawRegionsMap() {
@@ -59,6 +60,13 @@
 		query.send(handleQueryResponse3); 
       }
 	  
+	  function drawOverlay2() {
+        var opts = {sendMethod: 'auto'};
+		var query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1ZJW87NvajJZJlykvXHyHALX-R_Jyv3QreVwdjuAFmTE/edit?usp=sharing', opts);
+		query.setQuery('select B,C,D,A');
+		query.send(handleQueryResponse4); 
+      }
+	  
 	  
 	  function handleQueryResponse(response) {
 	  if (response.isError()) {
@@ -87,6 +95,7 @@
 		  || country == 'Germany' || country == 'Spain' || country == 'France') {
 			region = country;
 			drawCountryMap();
+			drawOverlay2();
 		  }
 	    }
 	  }
@@ -141,12 +150,13 @@
 		  'width':900,
 		  'height':500,
 		  colorAxis: {colors: ['#81d4fa', 'blue']},
-          backgroundColor: {fill: 'transparent', strokeWidth:0,stroke:'transparent'},
+          backgroundColor: { fill: 'transparent', stroke: 'transparent', strokeWidth: 1 },
           datalessRegionColor: 'transparent',
           defaultColor: 'transparent',
 		  displayMode: 'markers',
 		  legend: 'none',
 		  region: y,
+		  enableRegionInteractivity: true
 		}
 	  var sel = document.getElementById("select3");
 	  var x = sel.value;
@@ -161,6 +171,44 @@
       chart.draw(dataView, options);
 	  }
 	  
+	  function handleQueryResponse4(response) {
+	  if (response.isError()) {
+		alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
+		return;
+	  } 
+	  var x = 'US';
+	  if(region == 'China') x = 'CN';
+	  if(region == 'Italy') x = 'IT';
+	  if(region == 'United Kingdom') x = 'GB';
+	  if(region == 'Spain') x = 'ES';
+	  if(region == 'Germany') x = 'DE';
+	  if(region == 'France') x = 'FR';
+	  var options = {
+	      sizeAxis: { minValue: 0, maxValue: 200 },
+		  'width':900,
+		  'height':500,
+		  colorAxis: {colors: ['#81d4fa', 'blue']},
+          backgroundColor: { fill: 'transparent', stroke: 'transparent', strokeWidth: 1 },
+          datalessRegionColor: 'transparent',
+          defaultColor: 'transparent',
+		  displayMode: 'markers',
+		  legend: 'none',
+		  region: x,
+		  enableRegionInteractivity: true
+		}
+	  var sel = document.getElementById("select3");
+	  var x = sel.value;
+	  if(x==1) options['width']=1;
+	  if(x==1) options['height']=1;
+	  var data = response.getDataTable();
+	  var dataView = new google.visualization.DataView(data);
+	  dataView.setColumns([0,1,2,{sourceColumn:3,role:'tooltip'}]);
+	  var chart = new google.visualization.GeoChart(document.getElementById('markers_div2'));
+	  var sel = document.getElementById("select3");
+	  var x = sel.value;
+      chart.draw(dataView, options);
+	  }
+	  
     </script>
   </head>
   <body>
@@ -168,5 +216,6 @@
 		<td><div id="regions_div" style="border: 10px solid #ccc width: 900px; height: 550px"></div></td>
 		<td><div id="regions_div2" style="border: 10px solid #ccc width: 900px; height: 550px"></div></td>
 		<td><div id="markers_div" style="border: 10px solid #ccc width: 900px; height: 550px; position: absolute; top: 38; left:8"></div></td>
+		<td><div id="markers_div2" style="border: 10px solid #ccc width: 900px; height: 550px; position: absolute; top: 588; left:8"></div></td>
 	</body>
 </html>
