@@ -55,11 +55,8 @@
 	  function drawOverlay() {
         var opts = {sendMethod: 'auto'};
 		var query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1gDE-QQETeyQ_gBsbb9CXueuryhYUjK8CbbwSBLnmggY/edit?usp=sharing', opts);
-		var sel = document.getElementById("select3");
-		var x = sel.value;
-		if(x==1) drawRegionsMap();
-		if(x==2) { query.setQuery('select G,H,I');
-		query.send(handleQueryResponse3); }
+		query.setQuery('select G,H,I');
+		query.send(handleQueryResponse3); 
       }
 	  
 	  
@@ -142,12 +139,16 @@
 		  displayMode: 'markers',
 		  legend: 'none'
 		}
+	  var sel = document.getElementById("select3");
+	  var x = sel.value;
+	  if(x==1) options['width']=1;
+	  if(x==1) options['height']=1;
 	  var data = response.getDataTable();
 	  var chart = new google.visualization.GeoChart(document.getElementById('markers_div'));
-	  
-	  chart.draw(data, options);
+	  var sel = document.getElementById("select3");
+	  var x = sel.value;
+      chart.draw(data, options);
 	  }
-	  
 	  
     </script>
   </head>
