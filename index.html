@@ -12,8 +12,14 @@
 	<option value="3">Recovered</option>
 	<option value="4">Deaths</option>
 	</select>
+	</select>
+	<select style="height:30px" onchange="drawOverlay()" id='select3'>
+	<option value="1">Overlay Off</option>
+	<option value="2">Overlay On</option>
+	</select>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
+	
       google.charts.load('current', {
         'packages':['geochart'],
         // Note: you will need to get a mapsApiKey for your project.
@@ -46,6 +52,16 @@
 		query.send(handleQueryResponse2);
       }
 	  
+	  function drawOverlay() {
+        var opts = {sendMethod: 'auto'};
+		var query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1gDE-QQETeyQ_gBsbb9CXueuryhYUjK8CbbwSBLnmggY/edit?usp=sharing', opts);
+		var sel = document.getElementById("select3");
+		var x = sel.value;
+		if(x==1) drawRegionsMap();
+		if(x==2) { query.setQuery('select G,H,I');
+		query.send(handleQueryResponse3); }
+      }
+	  
 	  
 	  function handleQueryResponse(response) {
 	  if (response.isError()) {
@@ -61,7 +77,8 @@
           backgroundColor: '#81d4fa',
           datalessRegionColor: 'white',
           defaultColor: '#f5f5f5',
-		  region: x
+		  region: x,
+
 		}
 	  var data = response.getDataTable();
 	  var chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
@@ -97,14 +114,36 @@
 		  'width':900,
 		  'height':500,
 		  colorAxis: {colors: ['yellow','FFE033','FF7A33', 'red','maroon']},
-          backgroundColor: '#81d4fa',
-          datalessRegionColor: 'white',
-          defaultColor: '#f5f5f5',
+          backgroundColor: 'transparent',
+          datalessRegionColor: 'transparent',
+          defaultColor: 'transparent',
 		  region: x,
-		  resolution: 'provinces' 
+		  resolution: 'provinces' ,
+
 		}
 	  var data = response.getDataTable();
 	  var chart = new google.visualization.GeoChart(document.getElementById('regions_div2'));
+	  
+	  chart.draw(data, options);
+	  }
+	  
+	  function handleQueryResponse3(response) {
+	  if (response.isError()) {
+		alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
+		return;
+	  } 
+	  var options = {
+		  'width':900,
+		  'height':500,
+		  colorAxis: {colors: ['green', 'blue']},
+          backgroundColor: 'transparent',
+          datalessRegionColor: 'transparent',
+          defaultColor: 'transparent',
+		  displayMode: 'markers',
+		  legend: 'none'
+		}
+	  var data = response.getDataTable();
+	  var chart = new google.visualization.GeoChart(document.getElementById('markers_div'));
 	  
 	  chart.draw(data, options);
 	  }
@@ -116,6 +155,6 @@
 	<!--Divs that will hold the charts-->
 		<td><div id="regions_div" style="border: 10px solid #ccc width: 900px; height: 550px"></div></td>
 		<td><div id="regions_div2" style="border: 10px solid #ccc width: 900px; height: 550px"></div></td>
-
+		<td><div id="markers_div" style="border: 10px solid #ccc width: 900px; height: 550px; position: absolute; top: 38; left:8"></div></td>
 	</body>
 </html>
