@@ -5,6 +5,7 @@
 	<option value="world">Worldwide</option>
 	<option value="150">Europe</option>
 	<option value="142">Asia</option>
+	<option value="145">West Asia</option>
 	</select>
 	<select style="height:30px" onchange="drawRegionsMap()" id='select2'>
 	<option value="1">Active</option>
@@ -21,7 +22,7 @@
     <script type="text/javascript">
 	
       google.charts.load('current', {
-        'packages':['geochart'],
+        'packages':['geochart', 'table'],
         // Note: you will need to get a mapsApiKey for your project.
         // See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings
         'mapsApiKey': 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'
@@ -50,20 +51,21 @@
 		if(region=='Italy')query.setQuery('select H, I');
 		if(region=='United Kingdom')query.setQuery('select O, P');
 		if(region=='Spain')query.setQuery('select T, S');
+		if(region=='Israel')query.setQuery('select U, V');
 		query.send(handleQueryResponse2);
       }
 	  
 	  function drawOverlay() {
         var opts = {sendMethod: 'auto'};
 		var query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1ZJW87NvajJZJlykvXHyHALX-R_Jyv3QreVwdjuAFmTE/edit?usp=sharing', opts);
-		query.setQuery('select B,C,D,A');
+		query.setQuery('select B,C,D,E,A');
 		query.send(handleQueryResponse3); 
       }
 	  
 	  function drawOverlay2() {
         var opts = {sendMethod: 'auto'};
 		var query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1ZJW87NvajJZJlykvXHyHALX-R_Jyv3QreVwdjuAFmTE/edit?usp=sharing', opts);
-		query.setQuery('select B,C,D,A');
+		query.setQuery('select B,C,D,E,A');
 		query.send(handleQueryResponse4); 
       }
 	  
@@ -78,12 +80,12 @@
 	  var options = {
 		  'width':900,
 		  'height':500,
-		  colorAxis: {colors: ['yellow','FFE033','FF7A33', 'red','maroon']},
+		  colorAxis: {colors: ['yellow','FFE033','FF7A33', 'red','maroon'], },
           backgroundColor: '#81d4fa',
           datalessRegionColor: 'white',
           defaultColor: '#f5f5f5',
 		  region: x,
-
+		  legend: {textStyle: {color: 'black', fontSize: 15, bold: true, fontName: 'arial'}}
 		}
 	  var data = response.getDataTable();
 	  var chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
@@ -92,7 +94,7 @@
 	    if (selectedItem) {
 		  var country = data.getValue(selectedItem.row, 0);
 		  if(country == 'US' || country == 'China' || country == 'Italy' || country == 'United Kingdom'
-		  || country == 'Germany' || country == 'Spain' || country == 'France') {
+		  || country == 'Germany' || country == 'Spain' || country == 'France' || country == 'Israel') {
 			region = country;
 			drawCountryMap();
 			drawOverlay2();
@@ -102,6 +104,9 @@
 	  google.visualization.events.addListener(chart, 'select', selectHandler);
 	  
 	  chart.draw(data, options);
+	  
+	  var table = new google.visualization.Table(document.getElementById('table_div'));
+	  table.draw(data, {showRowNumber: true, width: '100%', height: '100%'});
 	  }
 	  
 	  function handleQueryResponse2(response) {
@@ -116,6 +121,7 @@
 	  if(region == 'Spain') x = 'ES';
 	  if(region == 'Germany') x = 'DE';
 	  if(region == 'France') x = 'FR';
+	  if(region == 'Israel') x = 'IL';
 	  var options = {
 		  'width':900,
 		  'height':500,
@@ -125,8 +131,9 @@
           defaultColor: '#f5f5f5',
 		  region: x,
 		  resolution: 'provinces' ,
-
+		  legend: {textStyle: {color: 'black', fontSize: 15, bold: true, fontName: 'arial'}}
 		}
+		if(region == 'Israel') options['resolution'] = 'region';
 	  var data = response.getDataTable();
 	  var dataView = new google.visualization.DataView(data);
 	  if(region == 'China') {
@@ -146,10 +153,10 @@
 	  var sel = document.getElementById("select1");
 	  var y = sel.value;
 	  var options = {
-	      sizeAxis: { minValue: 0, maxValue: 200 },
+	      sizeAxis: { minValue: 0, maxValue: 150 },
 		  'width':900,
 		  'height':500,
-		  colorAxis: {colors: ['#81d4fa', 'blue']},
+		  colorAxis: {colors: ['white','blue', 'red']},
           backgroundColor: { fill: 'transparent', stroke: 'transparent', strokeWidth: 1 },
           datalessRegionColor: 'transparent',
           defaultColor: 'transparent',
@@ -164,10 +171,19 @@
 	  if(x==1) options['height']=1;
 	  var data = response.getDataTable();
 	  var dataView = new google.visualization.DataView(data);
-	  dataView.setColumns([0,1,2,{sourceColumn:3,role:'tooltip'}]);
+	  dataView.setColumns([0,1,2,3,{sourceColumn:4,role:'tooltip'}]);
 	  var chart = new google.visualization.GeoChart(document.getElementById('markers_div'));
 	  var sel = document.getElementById("select3");
 	  var x = sel.value;
+	  
+	  var container = document.getElementById('markers_div');
+	  google.visualization.events.addListener(chart, 'ready', function () {
+			var countries = container.getElementsByTagName('path');
+			Array.prototype.forEach.call(countries, function(path) {
+			  path.setAttribute('stroke', 'transparent');
+			});
+		  });
+  
       chart.draw(dataView, options);
 	  }
 	  
@@ -183,11 +199,12 @@
 	  if(region == 'Spain') x = 'ES';
 	  if(region == 'Germany') x = 'DE';
 	  if(region == 'France') x = 'FR';
+	  if(region == 'Israel') x = 'IL';
 	  var options = {
-	      sizeAxis: { minValue: 0, maxValue: 200 },
+	      sizeAxis: { minValue: 0, maxValue: 50 },
 		  'width':900,
 		  'height':500,
-		  colorAxis: {colors: ['#81d4fa', 'blue']},
+		  colorAxis: {colors: ['white','blue', 'red']},
           backgroundColor: { fill: 'transparent', stroke: 'transparent', strokeWidth: 1 },
           datalessRegionColor: 'transparent',
           defaultColor: 'transparent',
@@ -202,10 +219,20 @@
 	  if(x==1) options['height']=1;
 	  var data = response.getDataTable();
 	  var dataView = new google.visualization.DataView(data);
-	  dataView.setColumns([0,1,2,{sourceColumn:3,role:'tooltip'}]);
+	  dataView.setColumns([0,1,2,3,{sourceColumn:4,role:'tooltip'}]);
 	  var chart = new google.visualization.GeoChart(document.getElementById('markers_div2'));
 	  var sel = document.getElementById("select3");
 	  var x = sel.value;
+	  
+	  var container = document.getElementById('markers_div2');
+	  google.visualization.events.addListener(chart, 'ready', function () {
+			var countries = container.getElementsByTagName('path');
+			Array.prototype.forEach.call(countries, function(path) {
+			  path.setAttribute('stroke', 'transparent');
+			});
+		  });
+  
+	  
       chart.draw(dataView, options);
 	  }
 	  
@@ -217,5 +244,6 @@
 		<td><div id="regions_div2" style="border: 10px solid #ccc width: 900px; height: 550px"></div></td>
 		<td><div id="markers_div" style="border: 10px solid #ccc width: 900px; height: 550px; position: absolute; top: 38; left:8"></div></td>
 		<td><div id="markers_div2" style="border: 10px solid #ccc width: 900px; height: 550px; position: absolute; top: 588; left:8"></div></td>
+		<td><div id="table_div" style="border: 10px solid #ccc width: 900px; height: 550px; position: absolute; top: 38; left:988"></div></td>
 	</body>
 </html>
