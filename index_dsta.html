@@ -1,7 +1,7 @@
 <html>
 	
 	<head>
-	<select style="height:30px" onchange="drawRegionsMap();" id='select1'>
+	<select style="height:30px" onchange="drawRegionsMap();drawOverlay();" id='select1'>
 	<option value="world">Worldwide</option>
 	<option value="150">Europe</option>
 	<option value="142">Asia</option>
@@ -12,6 +12,11 @@
 	<option value="2">Confirmed</option>
 	<option value="3">Recovered</option>
 	<option value="4">Deaths</option>
+	</select>
+	</select>
+	<select style="height:30px" onchange="drawOverlay();drawOverlay2()" id='select3'>
+	<option value="1">Overlay Off</option>
+	<option value="2">Overlay On</option>
 	</select>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
