@@ -17,7 +17,7 @@
 	<option value="2">Overlay On</option>
 	</select>
 	<div class="slidecontainer">
-	  <input onchange="drawRegionsMap()"style= "position:absolute; top:0;left:300 ;height: 25;width:600;border-radius:5px;background: #FCF3CF" type="range" min="1" max=100 value="100" class="slider" id="slider">
+	  <input onchange="drawRegionsMap()"style= "position:absolute; top:0;left:300 ;height: 25;width:600;border-radius:10px;background: #FCF3CF" type="range" min="1" max=100 value="100" class="slider" id="slider">
 	</div>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
@@ -73,7 +73,7 @@
 	  var data = response.getDataTable();
 	  date = data.getValue(0,0);
 	  lastcolumn = data.getValue(0,1);
-	  document.getElementById("datetime").innerHTML=date.toLocaleDateString();
+	  document.getElementById("datetime").innerHTML=date.toString();
 	  var olddate = new Date("01/22/2020");
 	  numdays = ((date-olddate)/(24 * 60 * 60 * 1000));
 	  document.getElementById("slider")['max']=numdays;
@@ -135,9 +135,9 @@
 	  var columnindex2 = document.getElementById("slider")['max'];
 	  var columnindex3 = document.getElementById("slider")['value'];
 	  var columnindex = parseInt(columnindex1)-parseInt(columnindex2)+parseInt(columnindex3);
-	  var newdate = new Date(date.toLocaleDateString());
+	  var newdate = new Date(date.toString());
 	  newdate.setDate(date.getDate()-parseInt(columnindex2)+parseInt(columnindex3));
-	  document.getElementById("datetime").innerHTML = newdate.toLocaleDateString();
+	  document.getElementById("datetime").innerHTML = newdate.toString();
 	  
       dataView.setColumns([2,columnindex-1]);
 	  var chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
