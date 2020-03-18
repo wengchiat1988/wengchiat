@@ -10,11 +10,11 @@
 	<select style="height:30px" onchange="drawRegionsMap()" id='select2'>
 	<option value="1">Active</option>
 	<option value="2">Confirmed</option>
-	<option value="3">Recovered</option>
-	<option value="4">Deaths</option>
 	</select>
 	</select>
-	
+	<div class="slidecontainer">
+	  <input onchange="drawRegionsMap()"style= "position:absolute; top:0;left:300 ;height: 25;width:600;border-radius:5px;background: #FCF3CF" type="range" min="1" max=100 value="100" class="slider" id="slider">
+	</div>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
 	
@@ -25,26 +25,60 @@
         // See: https://developers.google.com/chart/interactive/docs/basic_load_libs#load-settings
         'mapsApiKey': 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'
       });
-      google.charts.setOnLoadCallback(drawRegionsMap);
-	  google.charts.setOnLoadCallback(drawCountryMap);
 	  var region = 'US';
 	  var date = "";
 	  var lastcolumn = "A";
+	  var numdays = 40;
+	  google.charts.setOnLoadCallback(getInfo);
+      //google.charts.setOnLoadCallback(drawRegionsMap);
+	  //google.charts.setOnLoadCallback(drawCountryMap);
+	  
+	  
 	  
       function drawRegionsMap() {
-        var opts = {sendMethod: 'auto'};
-		var query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1gDE-QQETeyQ_gBsbb9CXueuryhYUjK8CbbwSBLnmggY/edit?usp=sharing', opts);
-		var query1 = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1gDE-QQETeyQ_gBsbb9CXueuryhYUjK8CbbwSBLnmggY/edit?usp=sharing', opts);
+		
+        var opts = {sendMethod: 'auto', };
 		var sel = document.getElementById("select2");
 		var x = sel.value;
-		query1.setQuery('select J,K');
-		query1.send(getInfo);
-		if(x==1) query.setQuery('select B, sum(I) group by B');
-		if(x==2) query.setQuery('select B, sum(D) group by B');
-		if(x==3) query.setQuery('select B, sum(F) group by B');
-		if(x==4) query.setQuery('select B, sum(E) group by B');
-		query.send(handleQueryResponse);
+		if(x==1) {
+			var query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1i0lfZ3mjDO-RxQWLpc7e5jDNG7IghAcOyZzGsMoLYSY/edit?usp=sharing', opts);
+			query.send(handleQueryResponse);
+		}
+		if(x==2) {
+			var query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1MK5_VBQOBCSB9OC9v7aSSX0IfbwSOt9hr9zaCU_IpYU/edit?usp=sharing', opts);
+			query.send(handleQueryResponse);
+		}
+		
       }
+	  
+	  function getInfo() {
+        var opts = {sendMethod: 'auto', };
+		var sel = document.getElementById("select2");
+		var x = sel.value;
+		var query1 = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1gDE-QQETeyQ_gBsbb9CXueuryhYUjK8CbbwSBLnmggY/edit?usp=sharing', opts);
+		query1.setQuery('select J,K');
+		query1.send(getInfo2);
+		
+      }
+	  
+	  function getInfo2(response) {
+	  if (response.isError()) {
+		alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
+		return;
+	  } 
+	  var data = response.getDataTable();
+	  date = data.getValue(0,0);
+	  lastcolumn = data.getValue(0,1);
+	  document.getElementById("datetime").innerHTML=date.toLocaleDateString();
+	  var olddate = new Date("01/22/2020");
+	  numdays = ((date-olddate)/(24 * 60 * 60 * 1000));
+	  document.getElementById("slider")['max']=numdays;
+	  document.getElementById("slider")['value']=numdays;
+	  drawRegionsMap();
+	  drawCountryMap();
+
+	  }
+	  
 	  
 	  function drawCountryMap() {
         var opts = {sendMethod: 'auto'};
@@ -53,7 +87,7 @@
 		if(region=='China')query.setQuery('select M, L,K');
 		if(region=='Italy')query.setQuery('select H, I');
 		if(region=='United Kingdom')query.setQuery('select O, P');
-		if(region=='Spain')query.setQuery('select T, S');
+		if(region=='Spain')query.setQuery('select T, S,R');
 		if(region=='Israel')query.setQuery('select U, V');
 		query.send(handleQueryResponse2);
       }
@@ -72,17 +106,7 @@
 		query.send(handleQueryResponse4); 
       }
 	  
-	  function getInfo(response) {
-		  if (response.isError()) {
-			alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
-			return;
-		  } 
-		  var data = response.getDataTable();
-		  date = data.getValue(0,0);
-		  lastcolumn = data.getValue(0,1);
-		  document.getElementById("datetime").innerHTML=date.toLocaleDateString();
-		  
-	  }
+
 	  
 	  function handleQueryResponse(response) {
 	  if (response.isError()) {
@@ -102,11 +126,21 @@
 		  legend: {textStyle: {color: 'black', fontSize: 15, bold: true, fontName: 'arial'}}
 		}
 	  var data = response.getDataTable();
+	  var dataView = new google.visualization.DataView(data);
+	  var columnindex1 = data.getNumberOfColumns();
+	  var columnindex2 = document.getElementById("slider")['max'];
+	  var columnindex3 = document.getElementById("slider")['value'];
+	  var columnindex = parseInt(columnindex1)-parseInt(columnindex2)+parseInt(columnindex3);
+	  var newdate = new Date(date.toLocaleDateString());
+	  newdate.setDate(date.getDate()-parseInt(columnindex2)+parseInt(columnindex3));
+	  document.getElementById("datetime").innerHTML = newdate.toLocaleDateString();
+	  
+      dataView.setColumns([2,columnindex-1]);
 	  var chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
 	  function selectHandler() {
 		var selectedItem = chart.getSelection()[0];
 	    if (selectedItem) {
-		  var country = data.getValue(selectedItem.row, 0);
+		  var country = data.getValue(selectedItem.row, 2);
 		  if(country == 'US' || country == 'China' || country == 'Italy' || country == 'United Kingdom'
 		  || country == 'Germany' || country == 'Spain' || country == 'France' || country == 'Israel') {
 			region = country;
@@ -117,10 +151,10 @@
 	  }
 	  google.visualization.events.addListener(chart, 'select', selectHandler);
 	  
-	  chart.draw(data, options);
+	  chart.draw(dataView, options);
 	  
 	  var table = new google.visualization.Table(document.getElementById('table_div'));
-	  table.draw(data, {showRowNumber: true, width: '100%', height: '100%'});
+	  table.draw(dataView, {showRowNumber: true, width: '100%', height: '100%'});
 	  }
 	  
 	  function handleQueryResponse2(response) {
@@ -150,16 +184,15 @@
 		if(region == 'Israel') options['resolution'] = 'region';
 	  var data = response.getDataTable();
 	  var dataView = new google.visualization.DataView(data);
-	  if(region == 'China') {
+	  if(region == 'China' || region == 'Spain') {
 		
 		dataView.setColumns([0,1,{sourceColumn:2,role:'tooltip'}]);
 		}
 	  var chart = new google.visualization.GeoChart(document.getElementById('regions_div2'));
 	  
 	  chart.draw(dataView, options);
-	  
 	  var table = new google.visualization.Table(document.getElementById('table_div2'));
-	  table.draw(data, {showRowNumber: true, width: '100%', height: '100%'});
+	  table.draw(dataView, {showRowNumber: true, width: '100%', height: '100%'});
 	  }
 	  
 	  function handleQueryResponse3(response) {
