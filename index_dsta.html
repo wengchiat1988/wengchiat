@@ -16,9 +16,6 @@
 	<option value="1">Overlay Off</option>
 	<option value="2">Overlay On</option>
 	</select>
-	<div class="slidecontainer">
-	  <input onchange="drawRegionsMap()"style= "position:absolute; top:0;left:300 ;height: 25;width:600;border-radius:10px;background: #FCF3CF" type="range" min="1" max=100 value="100" class="slider" id="slider">
-	</div>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
 	
@@ -30,12 +27,8 @@
         'mapsApiKey': 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'
       });
 	  var region = 'US';
-	  var date = "";
-	  var lastcolumn = "A";
-	  var numdays = 40;
-	  google.charts.setOnLoadCallback(getInfo);
-      //google.charts.setOnLoadCallback(drawRegionsMap);
-	  //google.charts.setOnLoadCallback(drawCountryMap);
+      google.charts.setOnLoadCallback(drawRegionsMap);
+	  google.charts.setOnLoadCallback(drawCountryMap);
 	  
 	  
 	  
@@ -45,45 +38,19 @@
 		var sel = document.getElementById("select2");
 		var x = sel.value;
 		if(x==1) {
-			var query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1i0lfZ3mjDO-RxQWLpc7e5jDNG7IghAcOyZzGsMoLYSY/edit?usp=sharing', opts);
+			var query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1gDE-QQETeyQ_gBsbb9CXueuryhYUjK8CbbwSBLnmggY/edit?usp=sharing', opts);
+			query.setQuery('select D,sum(K) group by D');
 			query.send(handleQueryResponse);
 		}
 		if(x==2) {
-			var query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1MK5_VBQOBCSB9OC9v7aSSX0IfbwSOt9hr9zaCU_IpYU/edit?usp=sharing', opts);
+			var query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1gDE-QQETeyQ_gBsbb9CXueuryhYUjK8CbbwSBLnmggY/edit?usp=sharing', opts);
+			query.setQuery('select D,sum(H) group by D');
 			query.send(handleQueryResponse);
 		}
 		
       }
-	  
-	  function getInfo() {
-        var opts = {sendMethod: 'auto', };
-		var sel = document.getElementById("select2");
-		var x = sel.value;
-		var query1 = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1gDE-QQETeyQ_gBsbb9CXueuryhYUjK8CbbwSBLnmggY/edit?usp=sharing', opts);
-		query1.setQuery('select J,K');
-		query1.send(getInfo2);
-		
-      }
-	  
-	  function getInfo2(response) {
-	  if (response.isError()) {
-		alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
-		return;
-	  } 
-	  var data = response.getDataTable();
-	  date = data.getValue(0,0);
-	  lastcolumn = data.getValue(0,1);
-	  document.getElementById("datetime").innerHTML=date.toString();
-	  var olddate = new Date("01/22/2020");
-	  numdays = ((date-olddate)/(24 * 60 * 60 * 1000));
-	  document.getElementById("slider")['max']=numdays;
-	  document.getElementById("slider")['value']=numdays;
-	  drawRegionsMap();
-	  drawCountryMap();
 
-	  }
-	  
-	  
+		  
 	  function drawCountryMap() {
         var opts = {sendMethod: 'auto'};
 		var query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/1ROh9TBJmFCXhBzc5pMniFqYKNIIDHWVfIHvYgUVOy90/edit?usp=sharing', opts);
@@ -131,20 +98,11 @@
 		}
 	  var data = response.getDataTable();
 	  var dataView = new google.visualization.DataView(data);
-	  var columnindex1 = data.getNumberOfColumns();
-	  var columnindex2 = document.getElementById("slider")['max'];
-	  var columnindex3 = document.getElementById("slider")['value'];
-	  var columnindex = parseInt(columnindex1)-parseInt(columnindex2)+parseInt(columnindex3);
-	  var newdate = new Date(date.toString());
-	  newdate.setDate(date.getDate()-parseInt(columnindex2)+parseInt(columnindex3));
-	  document.getElementById("datetime").innerHTML = newdate.toString();
-	  
-      dataView.setColumns([2,columnindex-1]);
 	  var chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
 	  function selectHandler() {
 		var selectedItem = chart.getSelection()[0];
 	    if (selectedItem) {
-		  var country = data.getValue(selectedItem.row, 2);
+		  var country = data.getValue(selectedItem.row, 0);
 		  if(country == 'US' || country == 'China' || country == 'Italy' || country == 'United Kingdom'
 		  || country == 'Germany' || country == 'Spain' || country == 'France' || country == 'Israel') {
 			region = country;
@@ -258,7 +216,7 @@
 	      sizeAxis: { minValue: 0, maxValue: 50 },
 		  'width':900,
 		  'height':500,
-		  colorAxis: {colors: ['white','blue', 'teal']},
+		  colorAxis: {colors: ['white','blue', 'green']},
           backgroundColor: { fill: 'transparent', stroke: 'transparent', strokeWidth: 1 },
           datalessRegionColor: 'transparent',
           defaultColor: 'transparent',
@@ -301,6 +259,5 @@
 		<td><div id="markers_div2" style="border: 5px solid #ccc width: 900px; height: 550px; position: absolute; top: 558; left:8"></div></td>
 		<td><div id="table_div" style="border: 5px solid #ccc width: 900px; height: 500px; position: absolute; top: 38; left:918"></div></td>
 		<td><div id="table_div2" style="border: 5px solid #ccc width: 900px; height: 500px; position: absolute; top: 558; left:918"></div></td>
-		<p id="datetime" style="font-family: Arial; font-size: 20px; font-weight:bold; position: absolute; top: 28; left:18"></p>
 	</body>
 </html>
